@@ -3,11 +3,13 @@ import { getDocs, collection, deleteDoc, doc } from 'firebase/firestore';
 import { db } from './firebase-config';
 import { Card, CardContent, Typography, Grid, Container, Button, CircularProgress, Box } from '@mui/material';
 import AddProductForm from './components/AddProductForm';
+// No necesitas importar el logo si está en la carpeta `public`
 
 const App = () => {
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true); // Estado de carga de los productos
-  const [deleting, setDeleting] = useState(false); // Estado de carga para eliminación
+  const [deletingId, setDeletingId] = useState(null); // Estado para identificar cuál producto está siendo eliminado
+  const [error, setError] = useState(false); // Estado para manejar los errores de carga
 
   const fetchProductos = async () => {
     setLoading(true);
@@ -20,9 +22,11 @@ const App = () => {
           ...doc.data(),
         }));
         setProductos(productosArray);
+        setError(false); // Resetea el error si la carga fue exitosa
         break;
       } catch (error) {
         console.error("Error al obtener los productos: ", error);
+        setError(true); // Marca el error
         retryAttempts--;
         if (retryAttempts === 0) {
           alert("Error al cargar los productos. Intenta de nuevo más tarde.");
@@ -36,16 +40,15 @@ const App = () => {
   };
 
   const handleDelete = async (id) => {
-    setDeleting(true);
+    setDeletingId(id); // Indica que este producto se está eliminando
     try {
       await deleteDoc(doc(db, 'productos', id)); // Elimina el producto de Firestore
-      // Actualiza el estado para reflejar la eliminación del producto en la UI
-      setProductos((prevProductos) => prevProductos.filter((producto) => producto.id !== id));
+      setProductos((prevProductos) => prevProductos.filter((producto) => producto.id !== id)); // Se asegura de que el estado se actualice correctamente
       alert('Producto eliminado');
     } catch (error) {
       console.error("Error al eliminar el producto: ", error);
     } finally {
-      setDeleting(false);
+      setDeletingId(null); // Reestablecer el estado de eliminación cuando termine
     }
   };
 
@@ -54,13 +57,33 @@ const App = () => {
   }, []);
 
   if (loading) {
-    return <CircularProgress />; // Muestra el indicador de carga mientras se obtienen los productos
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <Typography variant="h4">Cargando... Por favor espere</Typography>
+      </Box>
+    ); // Muestra el cartel de espera mientras se cargan los productos
+  }
+
+  if (error) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh" flexDirection="column">
+        <Typography variant="h4" color="error" gutterBottom>
+          ¡Oops! Hubo un problema al cargar los productos.
+        </Typography>
+        <Typography variant="h6" color="textSecondary">
+          Por favor, intente nuevamente más tarde.
+        </Typography>
+      </Box>
+    ); // Muestra un mensaje de error amigable si no se pudieron cargar los productos
   }
 
   return (
     <Container maxWidth="lg">
+      <Box display="flex" justifyContent="center" my={4}>
+        <img src={`${process.env.PUBLIC_URL}/logo-verduleria.png`} alt="Logo de la Verdulería" style={{ height: '100px' }} /> {/* Logo de la verdulería */}
+      </Box>
       <Typography variant="h3" gutterBottom textAlign="center">
-        Productos
+        TU VERDULERIA 
       </Typography>
 
       {/* Formulario de agregar producto */}
@@ -94,9 +117,9 @@ const App = () => {
                     variant="contained"
                     color="secondary"
                     onClick={() => handleDelete(producto.id)}
-                    disabled={deleting} // Desactiva el botón mientras se elimina un producto
+                    disabled={deletingId === producto.id} // Desactiva el botón solo para el producto que se está eliminando
                   >
-                    {deleting ? <CircularProgress size={24} color="inherit" /> : 'Eliminar'}
+                    {deletingId === producto.id ? <CircularProgress size={24} color="inherit" /> : 'Eliminar'}
                   </Button>
                 </Box>
               </CardContent>
