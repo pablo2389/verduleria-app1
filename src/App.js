@@ -38,29 +38,30 @@ const App = () => {
     setLoading(false);
   };
 
-  const agregarNuevoProducto = async () => {
-    if (!nuevoProducto.nombre || !nuevoProducto.precio || !nuevoProducto.stock) {
-      alert('Por favor, ingrese todos los datos');
-      return;
-    }
+  // Comentamos esta función ya que no está siendo usada
+  // const agregarNuevoProducto = async () => {
+  //   if (!nuevoProducto.nombre || !nuevoProducto.precio || !nuevoProducto.stock) {
+  //     alert('Por favor, ingrese todos los datos');
+  //     return;
+  //   }
 
-    // Asegúrate de que el stock sea un número decimal
-    const stockDecimal = parseFloat(nuevoProducto.stock);
+  //   // Asegúrate de que el stock sea un número decimal
+  //   const stockDecimal = parseFloat(nuevoProducto.stock);
 
-    if (isNaN(stockDecimal)) {
-      alert('El stock debe ser un número válido');
-      return;
-    }
+  //   if (isNaN(stockDecimal)) {
+  //     alert('El stock debe ser un número válido');
+  //     return;
+  //   }
 
-    await addDoc(collection(db, `usuarios/${usuario.uid}/productos`), {
-      nombre: nuevoProducto.nombre,
-      precio: parseFloat(nuevoProducto.precio),
-      stock: stockDecimal, // Guardamos el stock como un número decimal
-    });
+  //   await addDoc(collection(db, `usuarios/${usuario.uid}/productos`), {
+  //     nombre: nuevoProducto.nombre,
+  //     precio: parseFloat(nuevoProducto.precio),
+  //     stock: stockDecimal, // Guardamos el stock como un número decimal
+  //   });
 
-    setNuevoProducto({ nombre: '', precio: '', stock: '' });
-    obtenerProductos(usuario.uid);
-  };
+  //   setNuevoProducto({ nombre: '', precio: '', stock: '' });
+  //   obtenerProductos(usuario.uid);
+  // };
 
   const actualizarStock = async (productoId, cantidadVendida) => {
     const productoRef = doc(db, `usuarios/${usuario.uid}/productos`, productoId);
@@ -124,19 +125,20 @@ const App = () => {
     }
   };
 
-  const handleInputChange = (e, campo) => {
-    const { value } = e.target;
-    if (campo === 'precio' || campo === 'stock') {
-      const parsedValue = parseFloat(value);
-      if (!isNaN(parsedValue)) {
-        setNuevoProducto({ ...nuevoProducto, [campo]: parsedValue });
-      } else {
-        setNuevoProducto({ ...nuevoProducto, [campo]: '' });
-      }
-    } else {
-      setNuevoProducto({ ...nuevoProducto, [campo]: value });
-    }
-  };
+  // Comentamos esta función ya que no está siendo usada
+  // const handleInputChange = (e, campo) => {
+  //   const { value } = e.target;
+  //   if (campo === 'precio' || campo === 'stock') {
+  //     const parsedValue = parseFloat(value);
+  //     if (!isNaN(parsedValue)) {
+  //       setNuevoProducto({ ...nuevoProducto, [campo]: parsedValue });
+  //     } else {
+  //       setNuevoProducto({ ...nuevoProducto, [campo]: '' });
+  //     }
+  //   } else {
+  //     setNuevoProducto({ ...nuevoProducto, [campo]: value });
+  //   }
+  // };
 
   const agregarMasStock = async (productoId) => {
     const cantidadExtra = parseFloat(cantidadStock);
@@ -267,26 +269,12 @@ const App = () => {
 
       {compraFinalizada && (
         <div style={{ marginTop: '20px' }}>
-          <Typography variant="h4" align="center">¡Gracias por su compra!</Typography>
-          <Typography align="center">Productos adquiridos:</Typography>
-          {carrito.map((producto) => (
-            <Typography key={producto.id}>
-              {producto.nombre} - {producto.cantidad} kg - ${producto.precioTotal}
-            </Typography>
-          ))}
-          <Typography variant="h5" align="center">Total: ${totalCompra}</Typography>
+          <Typography align="center" variant="h6">Compra Finalizada!</Typography>
+          <Button fullWidth variant="outlined" onClick={reiniciarTransaccion}>
+            Nueva Compra
+          </Button>
         </div>
       )}
-
-      <Button
-        fullWidth
-        variant="outlined"
-        color="secondary"
-        onClick={reiniciarTransaccion}
-        style={{ marginTop: '20px' }}
-      >
-        Resetear Compra
-      </Button>
     </div>
   );
 };
