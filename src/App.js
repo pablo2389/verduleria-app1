@@ -14,11 +14,6 @@ const App = () => {
   const [totalCompra, setTotalCompra] = useState(0); // Total acumulado de la compra
   const [cantidadStock, setCantidadStock] = useState(''); // Para ingresar la cantidad de stock a agregar
   const [compraFinalizada, setCompraFinalizada] = useState(false); // Estado para saber si la compra se ha finalizado
-  const [nuevoProducto, setNuevoProducto] = useState({
-    nombre: '',
-    precio: '',
-    stock: '',
-  }); // Agregado nuevoProducto
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -104,21 +99,6 @@ const App = () => {
     }
   };
 
-  // eslint-disable-next-line no-unused-vars
-  const handleInputChange = (e, campo) => {
-    const { value } = e.target;
-    if (campo === 'precio' || campo === 'stock') {
-      const parsedValue = parseFloat(value);
-      if (!isNaN(parsedValue)) {
-        setNuevoProducto({ ...nuevoProducto, [campo]: parsedValue });
-      } else {
-        setNuevoProducto({ ...nuevoProducto, [campo]: '' });
-      }
-    } else {
-      setNuevoProducto({ ...nuevoProducto, [campo]: value });
-    }
-  };
-
   const agregarMasStock = async (productoId) => {
     const cantidadExtra = parseFloat(cantidadStock);
     if (isNaN(cantidadExtra) || cantidadExtra <= 0) {
@@ -132,7 +112,7 @@ const App = () => {
 
     await updateDoc(productoRef, { stock: nuevoStock });
     obtenerProductos(usuario.uid); // Actualizamos el stock en la interfaz
-    setCantidadStock('');
+    setCantidadStock(''); // Limpiar el input de cantidad de stock
   };
 
   const finalizarCompra = () => {
@@ -141,9 +121,7 @@ const App = () => {
       return;
     }
 
-    setCompraFinalizada(true);
-    setTotalCompra(totalCompra); // Aseguramos que el total final se mantenga intacto
-    setCarrito([]); // Vaciar el carrito después de finalizar la compra
+    setCompraFinalizada(true); // Marcamos que la compra ha sido finalizada
   };
 
   // Función para reiniciar la compra y empezar una nueva transacción
@@ -249,6 +227,7 @@ const App = () => {
       {compraFinalizada && (
         <div style={{ marginTop: '20px' }}>
           <Typography variant="h4" align="center">¡Compra Finalizada!</Typography>
+          <Typography variant="h5" align="center">Total: ${totalCompra}</Typography> {/* Mostrar el total */}
           <Button fullWidth variant="contained" onClick={reiniciarTransaccion}>
             Realizar una nueva compra
           </Button>
