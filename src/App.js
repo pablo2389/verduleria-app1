@@ -104,6 +104,7 @@ const App = () => {
     }
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleInputChange = (e, campo) => {
     const { value } = e.target;
     if (campo === 'precio' || campo === 'stock') {
