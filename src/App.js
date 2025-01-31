@@ -14,6 +14,11 @@ const App = () => {
   const [totalCompra, setTotalCompra] = useState(0); // Total acumulado de la compra
   const [cantidadStock, setCantidadStock] = useState(''); // Para ingresar la cantidad de stock a agregar
   const [compraFinalizada, setCompraFinalizada] = useState(false); // Estado para saber si la compra se ha finalizado
+  const [nuevoProducto, setNuevoProducto] = useState({
+    nombre: '',
+    precio: '',
+    stock: '',
+  }); // Agregado nuevoProducto
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
@@ -242,16 +247,9 @@ const App = () => {
 
       {compraFinalizada && (
         <div style={{ marginTop: '20px' }}>
-          <Typography variant="h4" align="center">¡Gracias por su compra!</Typography>
-          <Typography align="center">Productos adquiridos:</Typography>
-          {carrito.map((producto) => (
-            <Typography key={producto.id}>
-              {producto.nombre} - {producto.cantidad} kg - ${producto.precioTotal}
-            </Typography>
-          ))}
-          <Typography variant="h6" align="center">Total: ${totalCompra}</Typography>
-          <Button fullWidth variant="contained" onClick={reiniciarTransaccion} color="secondary">
-            Reiniciar Transacción
+          <Typography variant="h4" align="center">¡Compra Finalizada!</Typography>
+          <Button fullWidth variant="contained" onClick={reiniciarTransaccion}>
+            Realizar una nueva compra
           </Button>
         </div>
       )}
