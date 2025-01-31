@@ -1,6 +1,6 @@
 import { Button, Card, CardContent, CircularProgress, Grid, TextField, Typography } from '@mui/material';
 import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
-import { addDoc, collection, doc, getDocs, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, updateDoc } from 'firebase/firestore'; // Eliminamos addDoc
 import { useEffect, useState } from 'react';
 import { auth, db } from './firebase-config'; // Firebase config
 
@@ -9,7 +9,6 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [cantidad, setCantidad] = useState(0); // Cantidad en kg para la balanza
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
-  const [nuevoProducto, setNuevoProducto] = useState({ nombre: '', precio: '', stock: '' });
   const [usuario, setUsuario] = useState(null);
   const [carrito, setCarrito] = useState([]); // Carrito para los productos
   const [totalCompra, setTotalCompra] = useState(0); // Total acumulado de la compra
@@ -37,31 +36,6 @@ const App = () => {
     setProductos(productosArray);
     setLoading(false);
   };
-
-  // Comentamos esta función ya que no está siendo usada
-  // const agregarNuevoProducto = async () => {
-  //   if (!nuevoProducto.nombre || !nuevoProducto.precio || !nuevoProducto.stock) {
-  //     alert('Por favor, ingrese todos los datos');
-  //     return;
-  //   }
-
-  //   // Asegúrate de que el stock sea un número decimal
-  //   const stockDecimal = parseFloat(nuevoProducto.stock);
-
-  //   if (isNaN(stockDecimal)) {
-  //     alert('El stock debe ser un número válido');
-  //     return;
-  //   }
-
-  //   await addDoc(collection(db, `usuarios/${usuario.uid}/productos`), {
-  //     nombre: nuevoProducto.nombre,
-  //     precio: parseFloat(nuevoProducto.precio),
-  //     stock: stockDecimal, // Guardamos el stock como un número decimal
-  //   });
-
-  //   setNuevoProducto({ nombre: '', precio: '', stock: '' });
-  //   obtenerProductos(usuario.uid);
-  // };
 
   const actualizarStock = async (productoId, cantidadVendida) => {
     const productoRef = doc(db, `usuarios/${usuario.uid}/productos`, productoId);
@@ -125,20 +99,19 @@ const App = () => {
     }
   };
 
-  // Comentamos esta función ya que no está siendo usada
-  // const handleInputChange = (e, campo) => {
-  //   const { value } = e.target;
-  //   if (campo === 'precio' || campo === 'stock') {
-  //     const parsedValue = parseFloat(value);
-  //     if (!isNaN(parsedValue)) {
-  //       setNuevoProducto({ ...nuevoProducto, [campo]: parsedValue });
-  //     } else {
-  //       setNuevoProducto({ ...nuevoProducto, [campo]: '' });
-  //     }
-  //   } else {
-  //     setNuevoProducto({ ...nuevoProducto, [campo]: value });
-  //   }
-  // };
+  const handleInputChange = (e, campo) => {
+    const { value } = e.target;
+    if (campo === 'precio' || campo === 'stock') {
+      const parsedValue = parseFloat(value);
+      if (!isNaN(parsedValue)) {
+        setNuevoProducto({ ...nuevoProducto, [campo]: parsedValue });
+      } else {
+        setNuevoProducto({ ...nuevoProducto, [campo]: '' });
+      }
+    } else {
+      setNuevoProducto({ ...nuevoProducto, [campo]: value });
+    }
+  };
 
   const agregarMasStock = async (productoId) => {
     const cantidadExtra = parseFloat(cantidadStock);
@@ -269,9 +242,16 @@ const App = () => {
 
       {compraFinalizada && (
         <div style={{ marginTop: '20px' }}>
-          <Typography align="center" variant="h6">Compra Finalizada!</Typography>
-          <Button fullWidth variant="outlined" onClick={reiniciarTransaccion}>
-            Nueva Compra
+          <Typography variant="h4" align="center">¡Gracias por su compra!</Typography>
+          <Typography align="center">Productos adquiridos:</Typography>
+          {carrito.map((producto) => (
+            <Typography key={producto.id}>
+              {producto.nombre} - {producto.cantidad} kg - ${producto.precioTotal}
+            </Typography>
+          ))}
+          <Typography variant="h6" align="center">Total: ${totalCompra}</Typography>
+          <Button fullWidth variant="contained" onClick={reiniciarTransaccion} color="secondary">
+            Reiniciar Transacción
           </Button>
         </div>
       )}
