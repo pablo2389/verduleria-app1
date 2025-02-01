@@ -227,7 +227,7 @@ const App = () => {
       {compraFinalizada && (
         <div style={{ marginTop: '20px' }}>
           <Typography variant="h4" align="center">¡Compra Finalizada!</Typography>
-          <Typography variant="h5" align="center">Total: ${totalCompra}</Typography> {/* Mostrar el total */}
+          <Typography variant="h5" align="center">Total: ${totalCompra}</Typography>
           <Button fullWidth variant="contained" onClick={reiniciarTransaccion}>
             Realizar una nueva compra
           </Button>
