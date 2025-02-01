@@ -1,6 +1,6 @@
 import { Button, Card, CardContent, CircularProgress, Grid, TextField, Typography } from '@mui/material';
 import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
-import { collection, doc, getDocs, updateDoc } from 'firebase/firestore'; // Eliminamos addDoc
+import { collection, doc, getDocs, updateDoc } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { auth, db } from './firebase-config'; // Firebase config
 

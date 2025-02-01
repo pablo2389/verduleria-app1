@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth"; // Importar la funcionalidad de autenticación
 import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";  // Importar la funcionalidad de autenticación
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -23,4 +23,5 @@ const db = getFirestore(app);
 const auth = getAuth(app);  // Configurar autenticación
 
 // Exportar ambos
-export { db, auth };
+export { auth, db };
+
