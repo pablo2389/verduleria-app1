@@ -1,16 +1,16 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth"; // Importar la funcionalidad de autenticación
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";  // Importar la funcionalidad de autenticación
 
 // Configuración de Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyBxuqAM5n_dVCuQMvayFX7ZezA96sCIBNE",
-  authDomain: "verduleria-app-94aa2.firebaseapp.com",
-  projectId: "verduleria-app-94aa2",
-  storageBucket: "verduleria-app-94aa2.appspot.com",
-  messagingSenderId: "546750039898",
-  appId: "1:546750039898:web:8a869a8cc991a580825563",
-  measurementId: "G-6FSBVTNPP3"
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_AUTH_DOMAIN",
+  projectId: "TU_PROJECT_ID",
+  storageBucket: "TU_STORAGE_BUCKET",
+  messagingSenderId: "TU_MESSAGING_SENDER_ID",
+  appId: "TU_APP_ID",
+  measurementId: "TU_MEASUREMENT_ID"
 };
 
 // Inicializa Firebase
@@ -19,5 +19,4 @@ const db = getFirestore(app);
 const auth = getAuth(app);  // Configurar autenticación
 
 // Exportar ambos
-export { auth, db };
-
+export { db, auth };
