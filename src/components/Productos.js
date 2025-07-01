@@ -9,6 +9,9 @@ import {
   doc,
 } from "firebase/firestore";
 
+// Declaro la referencia a la colección fuera del componente
+const productosCol = collection(db, "productos");
+
 const Productos = () => {
   const [productos, setProductos] = useState([]);
 
@@ -20,8 +23,6 @@ const Productos = () => {
     unidad: "",
     ventaMinima: "",
   });
-
-  const productosCol = collection(db, "productos");
 
   // Obtener productos al cargar el componente
   useEffect(() => {
@@ -35,7 +36,7 @@ const Productos = () => {
     };
 
     fetchProductos();
-  }, []);
+  }, []); // Arreglo de dependencias vacío, no da warning
 
   // Manejo de cambios en el formulario
   const handleChange = (e) => {
