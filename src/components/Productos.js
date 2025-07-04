@@ -36,7 +36,8 @@ const Productos = () => {
     };
 
     fetchProductos();
-  }, []); // Arreglo de dependencias vacío, no da warning
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productosCol]); // Agregado productosCol en dependencias
 
   // Manejo de cambios en el formulario
   const handleChange = (e) => {
