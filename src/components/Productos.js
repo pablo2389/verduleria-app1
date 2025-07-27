@@ -1,178 +1,158 @@
 import React, { useState, useEffect } from "react";
-import { db } from "../services/firebase"; // Ajusta el path si tu archivo firebase.js está en otro lugar
+import { db } from "../services/firebase";
 import {
   collection,
   getDocs,
   addDoc,
-  updateDoc,
   deleteDoc,
   doc,
 } from "firebase/firestore";
 
-// Declaro la referencia a la colección fuera del componente
 const productosCol = collection(db, "productos");
 
 const Productos = () => {
   const [productos, setProductos] = useState([]);
+  const [nombre, setNombre] = useState("");
+  const [precio, setPrecio] = useState("");
+  const [stock, setStock] = useState("");
+  const [unidad, setUnidad] = useState("kg");
 
-  // Estado para el formulario de agregar producto
-  const [form, setForm] = useState({
-    nombre: "",
-    precio: "",
-    stock: "",
-    unidad: "",
-    ventaMinima: "",
-  });
-
-  // Obtener productos al cargar el componente
   useEffect(() => {
-    const fetchProductos = async () => {
-      const snapshot = await getDocs(productosCol);
-      const lista = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setProductos(lista);
-    };
+    obtenerProductos();
+  }, []);
 
-    fetchProductos();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productosCol]); // Agregado productosCol en dependencias
-
-  // Manejo de cambios en el formulario
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+  const obtenerProductos = async () => {
+    const data = await getDocs(productosCol);
+    setProductos(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
   };
 
-  // Sumar stock
-  const handleSumar = async (id, stockActual) => {
-    const productoRef = doc(db, "productos", id);
-    await updateDoc(productoRef, { stock: stockActual + 1 });
-    setProductos((prev) =>
-      prev.map((prod) =>
-        prod.id === id ? { ...prod, stock: prod.stock + 1 } : prod
-      )
-    );
-  };
-
-  // Restar stock
-  const handleRestar = async (id, stockActual) => {
-    if (stockActual <= 0) return;
-    const productoRef = doc(db, "productos", id);
-    await updateDoc(productoRef, { stock: stockActual - 1 });
-    setProductos((prev) =>
-      prev.map((prod) =>
-        prod.id === id ? { ...prod, stock: prod.stock - 1 } : prod
-      )
-    );
-  };
-
-  // Eliminar producto
-  const handleEliminar = async (id) => {
-    await deleteDoc(doc(db, "productos", id));
-    setProductos((prev) => prev.filter((prod) => prod.id !== id));
-  };
-
-  // Agregar producto
-  const handleAgregar = async (e) => {
-    e.preventDefault();
-
-    if (
-      !form.nombre ||
-      !form.precio ||
-      !form.stock ||
-      !form.unidad ||
-      !form.ventaMinima
-    ) {
-      alert("Por favor completa todos los campos.");
+  const agregarProducto = async () => {
+    if (!nombre.trim() || !precio || !stock) {
+      alert("Por favor completa todos los campos");
       return;
     }
 
-    const nuevoProducto = {
-      nombre: form.nombre,
-      precio: Number(form.precio),
-      stock: Number(form.stock),
-      unidad: form.unidad,
-      ventaMinima: Number(form.ventaMinima),
-    };
+    if (parseFloat(precio) <= 0) {
+      alert("El precio debe ser mayor a cero");
+      return;
+    }
 
-    const docRef = await addDoc(productosCol, nuevoProducto);
-    setProductos((prev) => [...prev, { id: docRef.id, ...nuevoProducto }]);
+    if (parseFloat(stock) < 0) {
+      alert("El stock no puede ser negativo");
+      return;
+    }
 
-    // Resetear formulario
-    setForm({
-      nombre: "",
-      precio: "",
-      stock: "",
-      unidad: "",
-      ventaMinima: "",
-    });
+    // Opcional: validar nombre duplicado
+    if (productos.some(p => p.nombre.toLowerCase() === nombre.trim().toLowerCase())) {
+      alert("Ya existe un producto con ese nombre");
+      return;
+    }
+
+    try {
+      await addDoc(productosCol, {
+        nombre: nombre.trim(),
+        precio: parseFloat(precio),
+        stock: parseFloat(stock),
+        unidad,
+      });
+      setNombre("");
+      setPrecio("");
+      setStock("");
+      setUnidad("kg");
+      obtenerProductos();
+    } catch (error) {
+      console.error("Error al agregar producto:", error);
+      alert("Error al agregar producto");
+    }
+  };
+
+  const handleDeleteProducto = async (id) => {
+    const confirmar = window.confirm("¿Estás seguro de eliminar este producto?");
+    if (!confirmar) return;
+
+    try {
+      await deleteDoc(doc(db, "productos", id));
+      obtenerProductos();
+    } catch (error) {
+      console.error("Error al eliminar producto:", error);
+      alert("No se pudo eliminar el producto.");
+    }
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>🛒 Verdulería - Productos</h1>
+    <div style={{ padding: 20, maxWidth: 600, margin: "auto", fontFamily: "Arial" }}>
+      <h1>🛒 Verdulería - Caja Registradora</h1>
 
-      {/* Formulario de agregar producto */}
-      <form onSubmit={handleAgregar} style={{ marginBottom: 20 }}>
-        <input
-          type="text"
-          name="nombre"
-          placeholder="Nombre"
-          value={form.nombre}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="number"
-          name="precio"
-          placeholder="Precio"
-          value={form.precio}
-          onChange={handleChange}
-          required
-          min="0"
-        />
-        <input
-          type="number"
-          name="stock"
-          placeholder="Stock"
-          value={form.stock}
-          onChange={handleChange}
-          required
-          min="0"
-          step="0.01"
-        />
-        <input
-          type="text"
-          name="unidad"
-          placeholder="Unidad (ej: kg, gr, pack, docena)"
-          value={form.unidad}
-          onChange={handleChange}
-          required
-        />
-        <input
-          type="number"
-          name="ventaMinima"
-          placeholder="Venta mínima"
-          value={form.ventaMinima}
-          onChange={handleChange}
-          required
-          min="0"
-          step="0.01"
-        />
-        <button type="submit">Agregar producto</button>
-      </form>
+      <h2>Agregar producto</h2>
+      <input
+        type="text"
+        placeholder="Nombre"
+        value={nombre}
+        onChange={(e) => setNombre(e.target.value)}
+        style={{ marginRight: 10, padding: 6 }}
+      />
+      <input
+        type="number"
+        placeholder="Precio por unidad"
+        value={precio}
+        min="0.01"
+        step="0.01"
+        onChange={(e) => setPrecio(e.target.value)}
+        style={{ marginRight: 10, padding: 6 }}
+      />
+      <input
+        type="number"
+        placeholder="Stock"
+        value={stock}
+        min="0"
+        step="0.001"
+        onChange={(e) => setStock(e.target.value)}
+        style={{ marginRight: 10, padding: 6 }}
+      />
+      <select
+        value={unidad}
+        onChange={(e) => setUnidad(e.target.value)}
+        style={{ marginRight: 10, padding: 6 }}
+      >
+        <option value="kg">kg</option>
+        <option value="grs">grs</option>
+        <option value="unidad">unidad</option>
+      </select>
+      <button onClick={agregarProducto} style={{ padding: "6px 12px" }}>
+        Agregar
+      </button>
 
-      {/* Lista de productos */}
-      {productos.map(({ id, nombre, precio, stock, unidad, ventaMinima }) => (
-        <div key={id} style={{ marginBottom: 12 }}>
-          <p>
-            <strong>{nombre}</strong> - $ {precio} - Stock: {stock} {unidad} - Venta mínima: {ventaMinima} {unidad}
-          </p>
-          <button onClick={() => handleSumar(id, stock)}>➕</button>
-          <button onClick={() => handleRestar(id, stock)}>➖</button>
-          <button onClick={() => handleEliminar(id)}>Eliminar</button>
+      <h2 style={{ marginTop: 40 }}>Productos</h2>
+      {productos.length === 0 && <p>No hay productos agregados.</p>}
+
+      {productos.map((p) => (
+        <div
+          key={p.id}
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "8px 0",
+            borderBottom: "1px solid #ccc",
+          }}
+        >
+          <div>
+            <strong>{p.nombre}</strong> - Stock: {p.stock.toFixed(3)} {p.unidad} - Precio: ${p.precio.toFixed(2)}
+          </div>
+
+          <button
+            onClick={() => handleDeleteProducto(p.id)}
+            style={{
+              backgroundColor: "red",
+              color: "white",
+              border: "none",
+              padding: "5px 10px",
+              borderRadius: 4,
+              cursor: "pointer",
+            }}
+          >
+            Quitar producto
+          </button>
         </div>
       ))}
     </div>
@@ -180,4 +160,3 @@ const Productos = () => {
 };
 
 export default Productos;
-
